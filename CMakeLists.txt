@@ -2,5 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 project(Sherlock-Framework)
 
 set(CMAKE_CXX_STANDARD 14)
-
+SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+SET(CMAKE_C_FLAGS_DEBUG "-g -O0")
+SET(CMAKE_CXX_FLAGS "-g -O0")
+SET(CMAKE_C_FLAGS "-g -O0")
+SET(CMAKE_BUILD_TYPE Debug)
 add_subdirectory(src)

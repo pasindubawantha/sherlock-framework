@@ -6,11 +6,28 @@
         {
             "label": "build",
             "type": "shell",
-            // "command": "cd debug && cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j7",
             "command": "cmake -DCMAKE_BUILD_TYPE=Debug .. && make -j7",
             "options": {
                 "cwd": "${workspaceFolder}/debug"
             },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "build and run",
+            "type": "shell",
+            "command": "cmake .. && make -j7 VERBOSE=1 && echo \"Build Complete ################## \n\n\" && ./src/Sherlock",
+            "options": {
+                "cwd": "${workspaceFolder}/debug"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
