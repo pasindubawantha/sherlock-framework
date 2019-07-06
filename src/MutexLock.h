@@ -9,7 +9,8 @@ class MutexLock
 private:
     
 protected:
-    bool locked = false;
+    int *lock;
+    int lock_sate;
 public:
     // Constructors
     MutexLock();

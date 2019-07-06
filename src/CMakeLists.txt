@@ -1,7 +1,8 @@
 message("Added sub direcotory ${CMAKE_CURRENT_SOURCE_DIR}")
 # add_subdirectory(LSTMCNNnet)
 
-add_executable(Sherlock main.cpp MainLoop.cpp HistoryBuffer.cpp MutexLock.cpp) 
+# add_executable(Sherlock main.cpp MainLoop.cpp HistoryBuffer.cpp MutexLock.cpp) 
+add_executable(Sherlock main.cpp MainLoop.cpp HistoryBuffer.cpp) 
 
 target_include_directories(Sherlock PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")  
 add_subdirectory(ProfilingModule)
