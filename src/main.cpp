@@ -23,40 +23,20 @@
 // #include "MutexLock.h"
 // #include "sherlock.h"
 
-inline bool acquireLock(int *lock){
-
-    int lockval;
-    bool returnvalue;
-    int res=0;
-int op1=20;
-int op2=30;
- 
-// __asm__ ( "movl $10, %eax;"
-//                     "movl $20, %ebx;"
-//                     "imull %ebx, %eax;"
-//     );
-    // asm (
-    // "0: lwarx %0,0,%2  \n" //load lock and reserve
-    // "   cmpwi 0,%0,0   \n" //compare the lock value to 0
-    // "   bne 1f         \n" //not 0 then exit function
-    // "   ori %0,%0,1    \n" //set the lock to 1
-    // "   stwcx. %0,0,%2 \n" //try to acquire the lock
-    // "   bne 0b         \n" //reservation lost, try again
-    // "   ori  %1,%1,1   \n" //set the return value to true
-    // "1:                \n" //didn't get lock, return false
-    // : "+r" (lockval), "+r" (returnvalue)
-    // : "r"(lock)            //parameter lock is an address
-    // : "%cr0" );             //cmpwi, stwcx both clobber cr0
-    __asm__(
-        "movle eax, 1;"
-        "xchg eax, %1;"
-        "movle %0, eax;"
-        :"+r" (lockval)
-        :"r" (lock)
-        :"%eax"
+inline bool acquireLock(unsigned *lock, std::string thread){
+    unsigned lockval = 0;
+    // std::cout << "[Mutex:" << thread << "] Lock aquiring" << std::endl;
+    __asm__ __volatile__(
+        "movl $1, %%eax;"
+        "xchg %%eax, %1;"
+        "movl %%eax, %0;"
+        :"=r" (lockval) /* %0: Out */
+        :"m" (*lock) /* %1: In */
+        :"%eax"/* Trash registers, registers used by my code */
     );
-   return (lockval == 0);
-//    return returnvalue;
+
+    // std::cout << "[Mutex:" << thread << "] Lock aquired" << std::endl;
+    return (lockval == 0);
 }
 
 int main()
@@ -91,8 +71,8 @@ int main()
     //                 MAP_SHARED | MAP_ANONYMOUS, -1, 0); // alocating shared pages
     // mutexLock = new (mutexLockSharedMemory) MutexLock(); //this is the so called "placement new" initialize HistoryBuffer u in shared pages
     
-    int *lockWord;
-    lockWord = (int*) mmap(NULL, sizeof(*lockWord), PROT_READ | PROT_WRITE, 
+    unsigned *lockWord;
+    lockWord = (unsigned*) mmap(NULL, sizeof(*lockWord), PROT_READ | PROT_WRITE, 
                     MAP_SHARED | MAP_ANONYMOUS, -1, 0); // alocating shared pages;
     *lockWord = 0;
 
@@ -115,7 +95,7 @@ int main()
         while(!(*last_line_processed || *file_failed_to_open)){
 
             // if(mutexLock->getLock()){ // this block is mutually locked
-            if(acquireLock(lockWord)){ // this block is mutually locked
+            if(acquireLock(lockWord, "child")){ // this block is mutually locked
                 if(!historyBuffer->hasTickedPrevious()){
                     // reading values
                     readCount++;
@@ -152,7 +132,7 @@ int main()
             double line_double;
             while(!in_file.eof()){
                 // if(mutexLock->getLock()){ // this block is mutually locked
-                if(acquireLock(lockWord)){ // this block is mutually locked
+                if(acquireLock(lockWord, "parent")){ // this block is mutually locked
                 
                     if(historyBuffer->hasTickedPrevious()){
                         std::getline(in_file,line);

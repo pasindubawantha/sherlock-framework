@@ -40,7 +40,7 @@ bool HistoryBuffer::writeSafe(double value)
 {
     if(!this->ticked_previous) return false;// MainLoop has not ticked previous element yet!
 
-    if(real_index > size){//Buffer overflow
+    if(real_index >= size){//Buffer overflow
         current_index_to_write = current_index_to_write % size;
     }
 
