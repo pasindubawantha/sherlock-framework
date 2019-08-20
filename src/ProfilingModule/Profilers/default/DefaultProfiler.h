@@ -16,13 +16,13 @@ public:
     // Constructors
     DefaultProfiler(std::string identifyer);
 
+    // Destructor
     virtual ~DefaultProfiler() override;
     
-    virtual void init();
+    virtual void init() override;
 
     virtual double profile() override;
 
-    virtual std::string getIdentifier() override;
 };
 
 #endif // _DEAFULTPROFILER_H_

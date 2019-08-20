@@ -138,8 +138,3 @@ double LSTMCNnetProfiler::profile()
     
     return profile;
 }
-
-std::string LSTMCNnetProfiler::getIdentifier()
-{
-    return this->identifyer;
-}

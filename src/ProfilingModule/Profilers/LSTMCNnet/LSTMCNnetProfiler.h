@@ -25,7 +25,6 @@ public:
 
     virtual double profile() override;
 
-    virtual std::string getIdentifier() override;
 };
 
 #endif // _LSTMCNNETPROFILER_H_

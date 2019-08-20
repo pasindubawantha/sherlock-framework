@@ -27,8 +27,3 @@ double DefaultProfiler::profile()
     double profile = this->sharedMemory->history->data[this->sharedMemory->history->index];
     return profile;
 }
-
-std::string DefaultProfiler::getIdentifier()
-{
-    return this->identifyer;
-}

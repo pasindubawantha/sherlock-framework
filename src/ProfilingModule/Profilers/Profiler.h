@@ -31,11 +31,14 @@ public:
         this->sharedMemory = sharedMemory;
     }
 
+    std::string getIdentifier(){
+        return this->identifyer;
+    }
+
     virtual void init() = 0;
 
     virtual double profile() = 0;
 
-    virtual std::string getIdentifier() = 0;
 };
 
 #endif // _PROFILER_H_
