@@ -7,6 +7,7 @@
 
 #include "HistoryBuffer.h"
 #include "Profiler.h"
+#include "SharedMemory.h"
 // #include "AnomalyDetectionModule/AnomalyDetector.h"
 // #include "AnomalyDetectionModule/DistanceMeasure.h"
 // #include "AnomalyDetectionModule/ThresholdSetter.h"
@@ -22,6 +23,7 @@ protected:
 
     // history buffer
     HistoryBuffer *historyBuffer;
+    SharedMemory *sharedMemory;
 
     // Profiling
     std::unique_ptr<Profiler> profiler; // pointer (profiler to be dynamically binded)
@@ -57,6 +59,7 @@ public:
     void setProfiler(Profiler *profiler);
 
     void setHistoryBuffer(HistoryBuffer *historyBuffer);
+    void setSharedMemory(SharedMemory *sharedMemory);
 
     void tick();
 };

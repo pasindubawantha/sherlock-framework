@@ -15,16 +15,16 @@ DefaultProfiler::~DefaultProfiler()
     std::cout << "[DefaultProfiler] Destroying {" << identifyer << "}"  << std::endl;
 }
 
-void DefaultProfiler::init(int historySize)
+void DefaultProfiler::init()
 {
     this->historySize = historySize;
 }
 
-double* DefaultProfiler::profile(const double *history, int history_current_index) 
+double DefaultProfiler::profile() 
 {
-    std::cout << history[history_current_index] << std::endl;
+    std::cout << this->sharedMemory->history->data[this->sharedMemory->history->index] << std::endl;
 
-    double *profile = new double[historySize];
+    double profile = this->sharedMemory->history->data[this->sharedMemory->history->index];
     return profile;
 }
 

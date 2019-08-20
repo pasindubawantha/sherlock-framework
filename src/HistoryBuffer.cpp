@@ -41,11 +41,14 @@ bool HistoryBuffer::writeSafe(double value)
     if(!this->ticked_previous) return false;// MainLoop has not ticked previous element yet!
 
     if(real_index >= size){//Buffer overflow
-        current_index_to_write = current_index_to_write % size;
+        for(int i=0; i<size-1; i++){
+            history[i] = history[i+1];
+        }
+        history[size-1] = value;
+    } else {
+        history[real_index] = value;
     }
 
-    history[current_index_to_write] = value;
-    current_index_to_write++;
     real_index++;
 
     this->ticked_previous = false;
@@ -56,14 +59,16 @@ bool HistoryBuffer::writeUnsafe(double value)
 {
     std::cout << "[HistoryBuffer | writeUnsafwe] warring this write does not ensure previous data is ticked by the MainLoop" << std::endl;
 
-    if(real_index > size){//Buffer overflow
-        current_index_to_write = current_index_to_write % size;
+    if(real_index >= size){//Buffer overflow
+        for(int i=0; i<size-1; i++){
+            history[i] = history[i+1];
+        }
+        history[size-1] = value;
+    } else {
+        history[real_index] = value;
     }
 
-    history[current_index_to_write] = value;
-    current_index_to_write++;
     real_index++;
-
     ticked_previous = false;
     return true;
 }
@@ -71,14 +76,8 @@ bool HistoryBuffer::writeUnsafe(double value)
 double* HistoryBuffer::copyHistoryArray()
 {
     double *historyArray = new double[size];
-    if(real_index < size){
-        for(int i=0; i<size; i++){
-            historyArray[i] = history[ (current_index_to_write -1 ) ];
-        }
-    } else {
-        for(int i=0; i<size; i++){
-            historyArray[i] = history[ (current_index_to_write+i) % size ];
-        }
+    for(int i=0; i<size; i++){
+        historyArray[i] = history[i];
     }
 
 
@@ -88,7 +87,7 @@ double* HistoryBuffer::copyHistoryArray()
 void HistoryBuffer::print()
 {
     std::cout << "[HistoryBuffer] Printing buffer " << std::endl;
-    for(int i=0; i < this->size; i++){
+    for(int i=0; i < size; i++){
         std::cout << "[HistoryBuffer | print]  [" << i << "] " << history[i] << std::endl;
     }
 }
@@ -96,4 +95,17 @@ void HistoryBuffer::print()
 void HistoryBuffer::print(int index)
 {
     std::cout << "[HistoryBuffer | print]  [" << index << "] " << history[index] << std::endl;
+}
+
+int HistoryBuffer::getCurrentIndexToRead()
+{
+    int current_index_to_read;
+
+    if(real_index < size){
+        current_index_to_read = real_index - 1;
+    } else {
+        current_index_to_read = size - 1;
+    }
+    
+    return current_index_to_read;
 }

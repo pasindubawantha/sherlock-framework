@@ -18,7 +18,6 @@ private:
 protected:
     double *history;
     int size;
-    int current_index_to_write = 0;
     int real_index = 0;
     bool ticked_previous = true;
 
@@ -38,11 +37,11 @@ public:
     // methods
     bool hasTickedPrevious() {return this->ticked_previous;};
     void setTickedPrevious(bool ticked) {this->ticked_previous = ticked;};
-
-    int getCuurentIndexToWirte() {return current_index_to_write;};
+    
     int getRealIndex() {return real_index;};
     int getSize() {return size;}
     
+    int getCurrentIndexToRead(); 
     void setSize(int size, double buffer[]);
     bool writeSafe(double value);
     bool writeUnsafe(double value);

@@ -1,7 +1,7 @@
 /**
  * TO-DO
  * - Extend History to multivariate
- * -- add support for hostory buffer
+ * -- add support for history buffer
  * -- add profileMultivariate to Profiler interface
  * -- option to switch main loop for multivariate(if history has multivariate data otherwies no)
  * 
@@ -42,7 +42,6 @@ void MainLoop::setProfiler(Profiler *profiler)
 {
     std::cout << "[MainLoop] Setting Profiler {" << profiler->getIdentifier() << "}" << std::endl;
     this->profiler.reset(profiler);
-    // p.reset();
 }
 
 void MainLoop::setHistoryBuffer(HistoryBuffer *historyBuffer)
@@ -50,32 +49,62 @@ void MainLoop::setHistoryBuffer(HistoryBuffer *historyBuffer)
     this->historyBuffer = historyBuffer;
 }
 
+void MainLoop::setSharedMemory(SharedMemory *sharedMemory)
+{
+    this->sharedMemory = sharedMemory;
+    this->profiler->setSharedMemory(sharedMemory);
+}
+
 void MainLoop::tick()
 {
-    std::cout << "[MainLoop] tick" << std::endl;
+    // std::cout << "[MainLoop] tick" << std::endl;
 
     // Getting short term history data
-    const double *history = historyBuffer->copyHistoryArray(); // copy history buffer
-    double finalValue;
-    int finalValueIndex;
+    double *history = historyBuffer->copyHistoryArray(); // copy history buffer
+;
+    int historyIndex = historyBuffer->getCurrentIndexToRead();
     int dataTickCount = historyBuffer->getRealIndex();
     int historySize = historyBuffer->getSize();
-    if(dataTickCount < historySize){
-        finalValueIndex = dataTickCount-1;
-        finalValue = history[dataTickCount-1];
-    } else {
-        finalValueIndex = historySize;
-        finalValue = history[historySize];
-    }
 
+    this->sharedMemory->history->data = history;
+    this->sharedMemory->history->size = historySize;
+    this->sharedMemory->history->index = historyIndex;
 
+    std::cout << "[MainLoop] tick count :" << dataTickCount << std::endl;
     // Running main loop
     if(dataTickCount == 1){// initialize all components
-        // profiler
-        profiler->init(historySize);
+        // profiler (array)
+        profiler->init();
+
+        // anomaly distance (array)
+
+        // anomaly threshold 
+
+        // anomaly detection
+
+
+        // concept drift distance
+
+        // concept drift threshold
+
+        // conceot drit detection 
 
     } else {// ususal tick
-        double *profile = profiler->profile(history, finalValueIndex);
-    
+        std::cout << "[MainLoop] actual :" << sharedMemory->history->data[sharedMemory->history->index] << std::endl << "--------" << std::endl;
+        // profiling
+        double profile = profiler->profile();
+        if(sharedMemory->profiler->profile->index < sharedMemory->profiler->profile->size - 1){
+            sharedMemory->profiler->profile->index++;
+        } else {
+            for(int i=0; i<sharedMemory->profiler->profile->size-1;i++){
+                sharedMemory->profiler->profile->data[i] = sharedMemory->profiler->profile->data[i+1];
+            }
+        }
+        sharedMemory->profiler->profile->data[sharedMemory->profiler->profile->index] = profile;
+        std::cout << "profile "<< profile << std::endl;
+
+        
     }
+    
+    // historyBuffer->print();
 }

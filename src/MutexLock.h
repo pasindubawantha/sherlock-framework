@@ -3,17 +3,17 @@
 
 #include <string>
 #include <iostream>
+#include <memory>
 
 class MutexLock
 {
 private:
     
 protected:
-    int *lock;
-    int lock_sate;
+
 public:
     // Constructors
-    MutexLock();
+    MutexLock(unsigned *lockWord);
 
     // Destructor
     ~MutexLock();
@@ -25,8 +25,9 @@ public:
     MutexLock(MutexLock &&source);
     
     // methods
-    bool getLock();
-    void unlock();
+    bool acquireLock(unsigned *lock, std::string thread);
+
+    void releaseLock(unsigned *lockWord, std::string thread);
 };
 
-#endif // _MutexLock_H_
+#endif // _MUTEXLOCK_H_

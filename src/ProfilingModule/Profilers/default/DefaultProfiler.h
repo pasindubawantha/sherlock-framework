@@ -18,9 +18,9 @@ public:
 
     virtual ~DefaultProfiler() override;
     
-    virtual void init(int historySize);
+    virtual void init();
 
-    virtual double* profile(const double *history, int history_current_index) override;
+    virtual double profile() override;
 
     virtual std::string getIdentifier() override;
 };

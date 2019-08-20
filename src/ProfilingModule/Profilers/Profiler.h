@@ -3,6 +3,7 @@
 // Abstract base class interface
 
 #include <string>
+#include "SharedMemory.h"
 
 class Profiler
 {
@@ -10,6 +11,7 @@ private:
     
 protected:
     std::string identifyer;
+    SharedMemory *sharedMemory;
     
 public:
     // // Constructors
@@ -25,9 +27,13 @@ public:
     // Profiler(Profiler &&source);
     
     // methods
-    virtual void init(int historySize) = 0;
+    void setSharedMemory(SharedMemory *sharedMemory){
+        this->sharedMemory = sharedMemory;
+    }
 
-    virtual double* profile(const double *history, int history_current_index) = 0;
+    virtual void init() = 0;
+
+    virtual double profile() = 0;
 
     virtual std::string getIdentifier() = 0;
 };
