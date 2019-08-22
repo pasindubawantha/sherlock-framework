@@ -1,60 +1,100 @@
 #ifndef _SHAREDMEMORY_H_
 #define _SHAREDMEMORY_H_
 
-template<typename T> struct Array {
+#include <string>
+#include <iostream>
+
+template<typename T> class Queue {
+    public:
+    
     T *data;
     int size;
     int index;
 
-    Array(int s){
-        size = s;
+    Queue(int size){
+        this->size = size;
         index = -1;
-        data = new T[s];
+        data = new T[size];
     }
+
+    void enQueue(T value){
+        if(index < size - 1){
+            index++;
+        } else {
+            for(int i=0; i<size-1; i++){
+                data[i] = data[i+1];
+            }
+        }
+        data[index] = value;
+    }
+
+    void printQueue(int lookBack){
+        if(index +1 - lookBack < 0){
+            lookBack = index + 1;
+        }
+         std::cout << "{" ;
+        for(int i=0; i<lookBack; i++){
+            std::cout << data[index + 1 - lookBack + i];
+            if(i != lookBack-1){
+                std::cout << ", ";
+            }
+        }
+        std::cout << "}" << std::endl;
+    }
+    
 };
 
 struct ProfilerMemory {
-    Array<double> *profile;
+    Queue<double> *profile;
     int inWindowSize;
     int OutWindowSize;
     bool training;
+    int profiledCount;
     ProfilerMemory(int size){
-        profile = new Array<double>(size);
+        profile = new Queue<double>(size);
+        profiledCount = 0;
+        training = true;
     }
 };
 
 struct AnomalyDetectorMemory {
-    Array<double> *distance;
+    Queue<double> *distance;
     int inWindowSize;
     double thresholdWarning;
     double thresholdAlram;
-    Array<bool> *warning;
-    Array<bool> *alarm;
+    Queue<bool> *warning;
+    Queue<bool> *alarm;
     bool training;
     AnomalyDetectorMemory(int sizeDistance, int sizeWarning, int sizeAlarm){
-        distance = new Array<double>(sizeDistance);
-        warning = new Array<bool>(sizeWarning);
-        alarm = new Array<bool>(sizeAlarm);
+        distance = new Queue<double>(sizeDistance);
+        warning = new Queue<bool>(sizeWarning);
+        alarm = new Queue<bool>(sizeAlarm);
+        training = true;
+        thresholdWarning = -1;
+        thresholdAlram = -1;
     }
 };
 
 struct ConceptDriftDetectorMemory {
-    Array<double> *distance;
+    Queue<double> *distance;
     int inWindowSize;
     double thresholdWarning;
     double thresholdAlram;
-    Array<bool> *warning;
-    Array<bool> *alarm;
+    Queue<bool> *warning;
+    Queue<bool> *alarm;
     bool training;
     ConceptDriftDetectorMemory(int sizeDistance, int sizeWarning, int sizeAlarm){
-        distance = new Array<double>(sizeDistance);
-        warning = new Array<bool>(sizeWarning);
-        alarm = new Array<bool>(sizeAlarm);
+        distance = new Queue<double>(sizeDistance);
+        warning = new Queue<bool>(sizeWarning);
+        alarm = new Queue<bool>(sizeAlarm);
+        training = true;
+        thresholdWarning = -1;
+        thresholdAlram = -1;
     }
 };
 
 struct SharedMemory {
-    Array<double> *history;
+    Queue<double> *history;
     ProfilerMemory *profiler;
     AnomalyDetectorMemory *anomalyDetector;
     ConceptDriftDetectorMemory *conceptDriftDetector;

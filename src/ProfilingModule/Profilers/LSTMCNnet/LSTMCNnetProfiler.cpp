@@ -131,6 +131,8 @@ double LSTMCNnetProfiler::profile()
 
             // getting predicted time series data points
             profile = predictionModel.predict(predictions, inWondow, sharedMemory->profiler->inWindowSize,lstmW, cnnW, abs)[0];
+            
+            sharedMemory->profiler->profiledCount++;
         }
     }
     // std::cout << this->sharedMemory->history->data[this->sharedMemory->history->index] << std::endl;

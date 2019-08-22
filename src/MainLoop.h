@@ -6,11 +6,14 @@
 #include <memory>
 
 #include "HistoryBuffer.h"
-#include "Profiler.h"
 #include "SharedMemory.h"
-// #include "AnomalyDetectionModule/AnomalyDetector.h"
-// #include "AnomalyDetectionModule/DistanceMeasure.h"
-// #include "AnomalyDetectionModule/ThresholdSetter.h"
+
+#include "Profiler.h"
+
+#include "AnomalyDistanceMeasure.h"
+#include "AnomalyThresholdSetter.h"
+#include "AnomalyDetector.h"
+
 // #include "ConceptDriftDectectionModule/ConceptDriftDetector.h"
 // #include "ConceptDriftDectectionModule/ConceptThresholdSetter.h"
 // #include "ConceptDriftDectectionModule/LossFunction.h"
@@ -28,10 +31,11 @@ protected:
     // Profiling
     std::unique_ptr<Profiler> profiler; // pointer (profiler to be dynamically binded)
 
-    // // Anomaly Detetion
-    // AnomalyDetector *anomalyDetector; // pointer (anomalyDetector to be dynamically binded)
-    // ThresholdSetter *thresholdSetter; // pointer (thresholdSetter to be dynamically binded)
-    // DistanceMeasure *distanceMeasure; // pointer (distanceMeasure to be dynamically binded)
+    // Anomaly Detetion
+    std::unique_ptr<AnomalyDistanceMeasure> anomalyDistanceMeasure; // pointer (anomalyDistanceMeasure to be dynamically binded)
+    std::unique_ptr<AnomalyThresholdSetter> anomalyThresholdSetter; // pointer (anomalyThresholdSetter to be dynamically binded)
+    std::unique_ptr<AnomalyDetector> anomalyDetector; // pointer (anomalyDetector to be dynamically binded)
+    
 
     // //
     // ConceptDriftDetector *conceptDriftDetector; // pointer (conceptDriftDetector to be dynamically binded)
@@ -57,6 +61,9 @@ public:
     }
 
     void setProfiler(Profiler *profiler);
+    void setAnomalyDistanceMeasure(AnomalyDistanceMeasure *anomalyDistanceMeasure);
+    void setAnomalyThresholdSetter(AnomalyThresholdSetter *anomalyThresholdSetter);
+    void setAnomalyDetector(AnomalyDetector *anomalyDetector);
 
     void setHistoryBuffer(HistoryBuffer *historyBuffer);
     void setSharedMemory(SharedMemory *sharedMemory);

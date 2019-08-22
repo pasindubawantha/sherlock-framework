@@ -44,6 +44,25 @@ void MainLoop::setProfiler(Profiler *profiler)
     this->profiler.reset(profiler);
 }
 
+void MainLoop::setAnomalyDistanceMeasure(AnomalyDistanceMeasure *anomalyDistanceMeasure)
+{
+    std::cout << "[MainLoop] Setting AnomalyDistanceMeasure {" << anomalyDistanceMeasure->getIdentifier() << "}" << std::endl;
+    this->anomalyDistanceMeasure.reset(anomalyDistanceMeasure);
+}
+
+void MainLoop::setAnomalyThresholdSetter(AnomalyThresholdSetter *anomalyThresholdSetter)
+{
+    std::cout << "[MainLoop] Setting AnomalyThresholdSetter {" << anomalyThresholdSetter->getIdentifier() << "}" << std::endl;
+    this->anomalyThresholdSetter.reset(anomalyThresholdSetter);
+}
+
+void MainLoop::setAnomalyDetector(AnomalyDetector *anomalyDetector)
+{
+    std::cout << "[MainLoop] Setting AnomalyDetector {" << anomalyDetector->getIdentifier() << "}" << std::endl;
+    this->anomalyDetector.reset(anomalyDetector);
+}
+
+
 void MainLoop::setHistoryBuffer(HistoryBuffer *historyBuffer)
 {
     this->historyBuffer = historyBuffer;
@@ -52,59 +71,107 @@ void MainLoop::setHistoryBuffer(HistoryBuffer *historyBuffer)
 void MainLoop::setSharedMemory(SharedMemory *sharedMemory)
 {
     this->sharedMemory = sharedMemory;
+    
     this->profiler->setSharedMemory(sharedMemory);
+    
+    this->anomalyDistanceMeasure->setSharedMemory(sharedMemory);
+    this->anomalyThresholdSetter->setSharedMemory(sharedMemory);
+    this->anomalyDetector->setSharedMemory(sharedMemory);
+    
 }
 
 void MainLoop::tick()
 {
-    // std::cout << "[MainLoop] tick" << std::endl;
+    int dataTickCount = historyBuffer->getRealIndex();
+    std::cout << "[MainLoop] tick count :" << dataTickCount << std::endl;
 
     // Getting short term history data
-    double *history = historyBuffer->copyHistoryArray(); // copy history buffer
-;
-    int historyIndex = historyBuffer->getCurrentIndexToRead();
-    int dataTickCount = historyBuffer->getRealIndex();
-    int historySize = historyBuffer->getSize();
+    this->sharedMemory->history->data = historyBuffer->copyHistoryArray(); // copy history buffer;
+    this->sharedMemory->history->size = historyBuffer->getSize();
+    this->sharedMemory->history->index = historyBuffer->getCurrentIndexToRead();
+    
 
-    this->sharedMemory->history->data = history;
-    this->sharedMemory->history->size = historySize;
-    this->sharedMemory->history->index = historyIndex;
-
-    std::cout << "[MainLoop] tick count :" << dataTickCount << std::endl;
-    // Running main loop
-    if(dataTickCount == 1){// initialize all components
-        // profiler (array)
+    if(dataTickCount == 1){// initialize all components on first tick
+        // profiler
         profiler->init();
 
-        // anomaly distance (array)
+        // anomaly distance
+        anomalyDistanceMeasure->init();
 
-        // anomaly threshold 
-
+        // anomaly threshold
+        anomalyThresholdSetter->init();
+        
         // anomaly detection
-
+        anomalyDetector->init();
 
         // concept drift distance
+        // TODO
 
         // concept drift threshold
+        // TODO
 
         // conceot drit detection 
+        // TODO
 
-    } else {// ususal tick
-        std::cout << "[MainLoop] actual :" << sharedMemory->history->data[sharedMemory->history->index] << std::endl << "--------" << std::endl;
-        // profiling
+    } else {// after initilizing runnning tick
+        
+        std::cout << "actual :" << sharedMemory->history->data[sharedMemory->history->index] << std::endl;
+        
+        // # Profiling
         double profile = profiler->profile();
-        if(sharedMemory->profiler->profile->index < sharedMemory->profiler->profile->size - 1){
-            sharedMemory->profiler->profile->index++;
-        } else {
-            for(int i=0; i<sharedMemory->profiler->profile->size-1;i++){
-                sharedMemory->profiler->profile->data[i] = sharedMemory->profiler->profile->data[i+1];
-            }
-        }
-        sharedMemory->profiler->profile->data[sharedMemory->profiler->profile->index] = profile;
+        sharedMemory->profiler->profile->enQueue(profile);
+        
         std::cout << "profile "<< profile << std::endl;
 
-        
+        // # Detection
+        if(sharedMemory->profiler->profiledCount > sharedMemory->anomalyDetector->inWindowSize){
+            
+
+            // ## Anomaly distance
+            double anomalyDistance = anomalyDistanceMeasure->measureDistance();
+            sharedMemory->anomalyDetector->distance->enQueue(anomalyDistance);
+            std::cout << "distance "<< anomalyDistance << std::endl;
+
+            // ## Concept distance
+            // TODO
+
+            // ## Anomaly thresholding
+            double anomalyWarningTheshold = anomalyThresholdSetter->getWarningThreshold();
+            sharedMemory->anomalyDetector->thresholdWarning = anomalyWarningTheshold;
+            
+            double anomalyAlarmTheshold = anomalyThresholdSetter->getAlarmThreshold();
+            sharedMemory->anomalyDetector->thresholdAlram = anomalyAlarmTheshold;
+
+            std::cout << "thesh warning " << anomalyWarningTheshold << std::endl;
+            std::cout << "thesh alarm " << anomalyAlarmTheshold << std::endl;
+
+            // ## Concept thresholding
+            // TODO
+
+            if(!sharedMemory->anomalyDetector->training){
+
+                // ## Anomaly detection
+                bool anomalyWarningLabel = anomalyDetector->detectWarnning();
+                sharedMemory->anomalyDetector->warning->enQueue(anomalyWarningLabel);
+
+                bool anomalyLabel = anomalyDetector->detectAlarm();
+                sharedMemory->anomalyDetector->alarm->enQueue(anomalyLabel);
+
+                std::cout << "warn " << anomalyWarningLabel << std::endl;
+                std::cout << "alarm " << anomalyLabel << std::endl;
+
+                // ## Concept detection
+                // TODO
+
+            }
+        }
     }
-    
+    // Debugging prints
+    // std::cout << "history ";
+    // sharedMemory->history->printQueue(6);
+    // std::cout << "profile ";
+    // sharedMemory->profiler->profile->printQueue(6);
+
     // historyBuffer->print();
+    std::cout << "------" << std::endl;
 }

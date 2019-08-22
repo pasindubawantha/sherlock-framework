@@ -3,27 +3,43 @@
 // Abstract base class interface
 
 #include <string>
+#include "SharedMemory.h"
 
 class AnomalyDetector
 {
 private:
     
 protected:
-    
+    std::string identifyer;
+    SharedMemory *sharedMemory;
+
 public:
     // Constructors
-    AnomalyDetector();
+    // AnomalyDetector();
 
     // Destructor
-    virtual ~AnomalyDetector();
+    virtual ~AnomalyDetector() {};
     
     // Copy constructor
-    AnomalyDetector(const AnomalyDetector &source);
+    // AnomalyDetector(const AnomalyDetector &source);
     
     // Move constructor
-    AnomalyDetector(AnomalyDetector &&source);
+    // AnomalyDetector(AnomalyDetector &&source);
     
     // methods
+    void setSharedMemory(SharedMemory *sharedMemory){
+        this->sharedMemory = sharedMemory;
+    }
+
+    std::string getIdentifier(){
+        return this->identifyer;
+    }
+
+    virtual void init() = 0;
+
+    virtual bool detectWarnning() = 0;
+
+    virtual bool detectAlarm() = 0;
 
 };
 

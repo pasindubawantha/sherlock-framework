@@ -3,19 +3,22 @@
 // Abstract base class interface
 
 #include <string>
+#include "SharedMemory.h"
 
 class AnomalyDistanceMeasure
 {
 private:
     
 protected:
+    std::string identifyer;
+    SharedMemory *sharedMemory;
     
 public:
     // // Constructors
     // AnomalyDistanceMeasure();
 
     // Destructor
-    virtual ~AnomalyDistanceMeasure();
+    virtual ~AnomalyDistanceMeasure() {};
     
     // // Copy constructor
     // AnomalyDistanceMeasure(const AnomalyDistanceMeasure &source);
@@ -24,11 +27,17 @@ public:
     // AnomalyDistanceMeasure(AnomalyDistanceMeasure &&source);
     
     // methods
-    virtual void init() override;
+    void setSharedMemory(SharedMemory *sharedMemory){
+        this->sharedMemory = sharedMemory;
+    }
 
-    virtual double profile() override;
+    std::string getIdentifier(){
+        return this->identifyer;
+    }
 
-    virtual std::string getIdentifier() override;
+    virtual void init() = 0;
+
+    virtual double measureDistance() = 0;
 
 };
 
