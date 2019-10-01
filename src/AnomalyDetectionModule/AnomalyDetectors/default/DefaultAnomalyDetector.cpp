@@ -32,6 +32,7 @@ bool DefaultAnomalyDetector::detectWarnning()
         result = true;
     }
 
+    // sharedMemory->anomalyDetector->warning->enQueue(result);
     return result;
 }
 
@@ -43,5 +44,6 @@ bool DefaultAnomalyDetector::detectAlarm()
         result = true;
     }
 
+    // sharedMemory->anomalyDetector->alarm->enQueue(result);
     return result;
 }

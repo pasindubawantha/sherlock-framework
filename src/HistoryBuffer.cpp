@@ -13,6 +13,7 @@ HistoryBuffer::HistoryBuffer()
 HistoryBuffer::~HistoryBuffer()
 {
     std::cout << "[HistoryBuffer] Destroying"  << std::endl;
+    *history = NULL;
 }
 
 // Copy constructor

@@ -50,9 +50,12 @@ struct ProfilerMemory {
     int OutWindowSize;
     bool training;
     int profiledCount;
+    int minTrainingWindowSize;
+    int trainingDataCollected;
     ProfilerMemory(int size){
         profile = new Queue<double>(size);
         profiledCount = 0;
+        trainingDataCollected = 1;
         training = true;
     }
 };
@@ -103,6 +106,9 @@ struct SharedMemory {
         anomalyDetector = amem;
         conceptDriftDetector = cmem;
     };
+    ~SharedMemory(){
+        std::cout << "[SharedMemory] Destroying"  << std::endl;
+    }
 };
 
 #endif // _SHAREDMEMORY_H_

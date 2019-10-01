@@ -16,7 +16,14 @@ LSTMCNNFCPredictionModel::LSTMCNNFCPredictionModel(ModelStruct * modelStruct) {
 
 LSTMCNNFCPredictionModel::LSTMCNNFCPredictionModel(const LSTMCNNFCPredictionModel& orig) { }
 
-LSTMCNNFCPredictionModel::~LSTMCNNFCPredictionModel() { }
+LSTMCNNFCPredictionModel::~LSTMCNNFCPredictionModel() {
+    std::cout << "[LSTMCNNFCPredictionModel] Destroying !" << std::endl;
+    delete lstm;
+    delete cnn;
+    // delete modelStruct;
+    // delete fileProc;
+    // delete dataproc;
+ }
 
 int LSTMCNNFCPredictionModel::train(double *trainingTimeSeriesArray, int trainingTimeSeriesArraySize) {
 
@@ -106,7 +113,7 @@ int LSTMCNNFCPredictionModel::train(double *trainingTimeSeriesArray, int trainin
     // Training the network
     cnn->train(inMatArr, inLblArr, trainDataSize, iterations, learningRate);
 
-
+    // delete input;
     return 0;
 }
 
@@ -297,6 +304,6 @@ double* LSTMCNNFCPredictionModel::predict(int predSize, double* inWindow, int in
 
     }
     
-    
+    // delete input;
     return returnResult;
 }

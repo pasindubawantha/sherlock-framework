@@ -16,7 +16,42 @@ LSTMNet::LSTMNet(int memCells, int inputVecSize) {
 
 LSTMNet::LSTMNet(const LSTMNet& orig) { }
 
-LSTMNet::~LSTMNet() { }
+LSTMNet::~LSTMNet() {
+    // // weight vector arrays
+    // delete aWeightVecArr;
+    // delete iWeightVecArr;
+    // delete fWeightVecArr;
+    // delete oWeightVecArr;
+    
+    // // bias value arrays
+    // delete aBiasArr;
+    // delete iBiasArr;
+    // delete fBiasArr;
+    // delete oBiasArr;
+    
+    // delete memCellOutArr;
+    // delete memCellStateArr;
+    
+    // // gate output value arrays
+    // delete aGateVecArr;
+    // delete iGateVecArr;
+    // delete fGateVecArr;
+    // delete oGateVecArr;
+    
+    // delete aGateDeltaVecArr;
+    // delete iGateDeltaVecArr;
+    // delete fGateDeltaVecArr;
+    // delete oGateDeltaVecArr;
+    
+    // delete xDeltaVecArr;
+    
+    // delete aDeltaWeightVecArr;
+    // delete iDeltaWeightVecArr;
+    // delete fDeltaWeightVecArr;
+    // delete oDeltaWeightVecArr;
+    
+    // delete input2; // vector array created using the prediction inputs
+ }
 
 int LSTMNet::forward(std::vector<double> * input, int timeSteps) {
     

@@ -79,7 +79,15 @@ CNN::CNN(std::tuple <int, int, int> dimensions, struct NetStruct netStruct) {
 
 CNN::CNN(const CNN& orig) { }
 
-CNN::~CNN() { }
+CNN::~CNN() { 
+    delete layerOrder;
+    // delete weights;
+    // delete output;
+    // delete activatedOut;
+    // delete poolDeltaW;
+    // delete delta2;
+    // delete filterDelta;
+}
 
 int CNN::forward(Eigen::MatrixXd * layerInput) {
 
@@ -89,9 +97,9 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
         switch (layerOrder[i]) {
             case 'C':
             {    
-//                std::cout<<"Forward Pass: Convolution Layer"<<CLpos+1<<"...\n";
+            //    std::cout<<"Forward Pass: Convolution Layer"<<CLpos+1<<"...\n";
                 layerInput = netLayers.CL[CLpos].convolute(layerInput);
-//                std::cout<<layerInput[0]<<"*******\n\n";
+            //    std::cout<<layerInput[0]<<"*******\n\n";
                 /////////////////////////////////////////////////////////////
                                 
                 // Write convoluted images 
@@ -108,9 +116,9 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             }
             case 'P':
             {    
-//                std::cout<<"Forward Pass: Pool Layer"<<PLpos+1<<"...\n";
+            //    std::cout<<"Forward Pass: Pool Layer"<<PLpos+1<<"...\n";
                 layerInput = netLayers.PL[PLpos].pool(layerInput);
-//                std::cout<<layerInput[0]<<"*******\n\n";
+            //    std::cout<<layerInput[0]<<"*******\n\n";
                 /////////////////////////////////////////////////////////////
                 // Write pooled results
                 /*       
@@ -126,13 +134,13 @@ int CNN::forward(Eigen::MatrixXd * layerInput) {
             }
             case 'F':
             {    
-//                std::cout<<"Forward Pass: Fully Connected Layer"<<FCLpos+1<<"...\n";
+            //    std::cout<<"Forward Pass: Fully Connected Layer"<<FCLpos+1<<"...\n";
                 layerInput = netLayers.FCL[FCLpos].forward(layerInput);
-//                std::cout<<layerInput[0]<<"*******\n\n";
+            //    std::cout<<layerInput[0]<<"*******\n\n";
                 FCLpos++;
                 if (FCLpos == netLayers.numFCL) {
                     classPredicts = layerInput[0];
-//                    std::cout<<classPredicts<<"\n******\n";
+                //    std::cout<<classPredicts<<"\n******\n";
                 }
                 break;    
             }    
@@ -148,10 +156,10 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
     outDeriv = Activation::sigmoidDeriv(outDeriv);
     Eigen::MatrixXd delta = (forwardOut-label).array() * outDeriv.array();
     
-//    std::cout<<forwardOut<<"\n";
-//    std::cout<<label<<"\n";
-//    std::cout<<outDeriv<<"\n";    
-//    std::cout<<delta<<"\n\n";
+    // std::cout<<forwardOut<<"\n";
+    // std::cout<<label<<"\n";
+    // std::cout<<outDeriv<<"\n";    
+    // std::cout<<delta<<"\n\n";
     
     weights = netLayers.FCL[netLayers.numFCL-1].weights;
     output = netLayers.FCL[netLayers.numFCL-1].output;
@@ -208,18 +216,18 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
         switch (layerOrder[layer]) {
             case 'C':
             {    
-//                std::cout<<"Backward Pass from Convolution Layer"<<CLpos+1<<"...\n";
+            //    std::cout<<"Backward Pass from Convolution Layer"<<CLpos+1<<"...\n";
                 
                 int stride = netLayers.CL[CLpos].stride;
                 int noOfFilters = netLayers.CL[CLpos].noOfFilters;
                 int filterSize = netLayers.CL[CLpos].filterSize;
-//                Eigen::MatrixXd biasDelta;
+            //    Eigen::MatrixXd biasDelta;
                 delta = backPropgateToFilters(weights,stride,filterSize,activatedOut);
                 
                 outputs = poolDepth;
                 depth = noOfFilters;
                 weights = new Eigen::MatrixXd * [poolDepth];
-//                delta = Eigen::MatrixXd(poolDepth,1);
+            //    delta = Eigen::MatrixXd(poolDepth,1);
                 for (int i = 0; i < poolDepth; i++) {
                     weights[i] = new Eigen::MatrixXd[noOfFilters];
                     for (int j = 0; j < noOfFilters; j++) {
@@ -239,7 +247,7 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
             }
             case 'P':
             {    
-//                std::cout<<"Backward Pass from Pool Layer"<<PLpos+1<<"...\n";
+            //    std::cout<<"Backward Pass from Pool Layer"<<PLpos+1<<"...\n";
                 
                 outHeightC = netLayers.PL[PLpos].outHeight;
                 outWidthC = netLayers.PL[PLpos].outWidth;
@@ -252,18 +260,18 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
                 backPropgateToConv(delta, weights, activatedOut, 
                         maxIndices, poolH, poolW, output);
                 
-//                if ( PLpos == 0 ) {std::exit(0); }
+            //    if ( PLpos == 0 ) {std::exit(0); }
                 PLpos--;
                 break;
             }
             case 'F':
             {
-//                std::cout<<"Backward Pass from Fully Connected Layer"<<FCLpos+1<<"...\n";
+            //    std::cout<<"Backward Pass from Fully Connected Layer"<<FCLpos+1<<"...\n";
                 if ( layerOrder[layer-1] == 'F' ) {
                     Eigen::MatrixXd deltaW;
                     if ( layer == (layers-1)) {
                         // error values in each iteration
-//                        std::cout<<(delta.sum() / delta.size())<<"\n";
+                    //    std::cout<<(delta.sum() / delta.size())<<"\n";
                         
                         ///////////////////////////////////////////////////////////
                         res = backPropgateLayer(delta, activatedOut);
@@ -278,6 +286,20 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
                     
                     outputs = netLayers.FCL[FCLpos].outputs;
                     depth = netLayers.FCL[FCLpos].depth;
+                    
+
+                    // if(FCLpos > 0){
+                    //     for(int i = 0; i < netLayers.FCL[FCLpos -1].outputs; i++) {
+                    //         delete weights[i];
+                    //         // weights[i] = new Eigen::MatrixXd[depth];
+                    //         // for(int j = 0; j < depth; j++) {
+                    //         //     weights[i][j] = netLayers.FCL[FCLpos].weights[i][j];
+                    //         // }
+                    //     }
+                    // }
+
+                    // delete weights;
+                    
                     weights = new Eigen::MatrixXd * [outputs];
                     for(int i = 0; i < outputs; i++) {
                         weights[i] = new Eigen::MatrixXd[depth];
@@ -309,6 +331,7 @@ int CNN::backprop(Eigen::MatrixXd * input, Eigen::MatrixXd label) {
                     
                     outputs = netLayers.FCL[FCLpos].outputs;
                     depth = netLayers.FCL[FCLpos].depth;
+
                     weights = new Eigen::MatrixXd * [outputs];
                     for(int i = 0; i < outputs; i++) {
                         weights[i] = new Eigen::MatrixXd[depth];

@@ -18,7 +18,9 @@ public:
     // AnomalyDistanceMeasure();
 
     // Destructor
-    virtual ~AnomalyDistanceMeasure() {};
+    virtual ~AnomalyDistanceMeasure() {
+        sharedMemory = NULL;
+    };
     
     // // Copy constructor
     // AnomalyDistanceMeasure(const AnomalyDistanceMeasure &source);

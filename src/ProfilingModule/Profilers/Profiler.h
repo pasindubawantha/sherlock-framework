@@ -18,7 +18,9 @@ public:
     // virtual Profiler();
 
     // // Destructor
-    virtual ~Profiler() {};
+    virtual ~Profiler() {
+        sharedMemory = NULL;
+    };
     
     // // Copy constructor
     // Profiler(const Profiler &source);

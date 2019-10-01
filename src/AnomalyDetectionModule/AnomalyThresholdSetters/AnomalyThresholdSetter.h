@@ -19,7 +19,9 @@ public:
     // AnomalyThresholdSetter();
 
     // Destructor
-    virtual ~AnomalyThresholdSetter() {};
+    virtual ~AnomalyThresholdSetter() {
+        sharedMemory = NULL;
+    };
     
     // Copy constructor
     // AnomalyThresholdSetter(const AnomalyThresholdSetter &source);

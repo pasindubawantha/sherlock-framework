@@ -9,6 +9,15 @@ TrainingMaxAnomalyThresholdSetter::TrainingMaxAnomalyThresholdSetter(std::string
     std::cout << "[TrainingMaxAnomalyThresholdSetter] Constructing {" << identifyer << "}"  << std::endl;
 }
 
+TrainingMaxAnomalyThresholdSetter::TrainingMaxAnomalyThresholdSetter(std::string identifyer, double maxMultiplierWarning, double maxMultiplierAlarm){   
+    this->identifyer = identifyer;
+    this->maxMultiplierWarning = maxMultiplierWarning;
+    this->maxMultiplierAlarm = maxMultiplierAlarm;
+
+
+    std::cout << "[TrainingMaxAnomalyThresholdSetter] Constructing {" << identifyer << "}"  << std::endl;
+}
+
 // Destroying
 TrainingMaxAnomalyThresholdSetter::~TrainingMaxAnomalyThresholdSetter()
 {
@@ -20,8 +29,6 @@ void TrainingMaxAnomalyThresholdSetter::init()
     std::cout << "[TrainingMaxAnomalyThresholdSetter] Initializing {" << identifyer << "}"  << std::endl;
 
     thresholdTrainingWindow = sharedMemory->anomalyDetector->distance->size;
-    maxMultiplierWarning = 1;
-    maxMultiplierAlarm = 1.5;
 
     warningThreshold = -1;
     alarmThreshold = -1;
@@ -36,7 +43,7 @@ double TrainingMaxAnomalyThresholdSetter::getWarningThreshold()
     
     if((!thresholdSet) &&
         (!sharedMemory->profiler->training) &&
-        sharedMemory->profiler->profiledCount >= thresholdTrainingWindow &&
+        (sharedMemory->profiler->profiledCount + sharedMemory->anomalyDetector->inWindowSize) >= thresholdTrainingWindow &&
         sharedMemory->anomalyDetector->distance->index +1 >= thresholdTrainingWindow){
         for(int i=0; i < thresholdTrainingWindow; i++){
             if(warningThreshold < sharedMemory->anomalyDetector->distance->data[sharedMemory->anomalyDetector->distance->size - thresholdTrainingWindow + i]){

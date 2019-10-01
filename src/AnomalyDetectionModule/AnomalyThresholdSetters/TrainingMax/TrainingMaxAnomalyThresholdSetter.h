@@ -11,8 +11,8 @@ private:
     
 protected:
     int thresholdTrainingWindow;
-    double maxMultiplierWarning;
-    double maxMultiplierAlarm;
+    double maxMultiplierWarning = 1;
+    double maxMultiplierAlarm = 1.5;
     double warningThreshold;
     double alarmThreshold;
     bool thresholdSet;
@@ -21,6 +21,8 @@ protected:
 public:
     // Constructors
     TrainingMaxAnomalyThresholdSetter(std::string identifyer);
+
+    TrainingMaxAnomalyThresholdSetter(std::string identifyer, double maxMultiplierWarning, double maxMultiplierAlarm);
 
     // Destructor
     virtual ~TrainingMaxAnomalyThresholdSetter() override;

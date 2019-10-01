@@ -3,27 +3,43 @@
 // Abstract base class interface
 
 #include <string>
+#include "SharedMemory.h"
 
 class ConceptDistanceMeasure
 {
 private:
     
 protected:
+    std::string identifyer;
+    SharedMemory *sharedMemory;
     
 public:
-    // Constructors
-    ConceptDistanceMeasure();
+    // // Constructors
+    // ConceptDistanceMeasure();
 
     // Destructor
-    virtual ~ConceptDistanceMeasure();
+    virtual ~ConceptDistanceMeasure() {
+        sharedMemory = NULL;
+    };
     
-    // Copy constructor
-    ConceptDistanceMeasure(const ConceptDistanceMeasure &source);
+    // // Copy constructor
+    // ConceptDistanceMeasure(const ConceptDistanceMeasure &source);
     
-    // Move constructor
-    ConceptDistanceMeasure(ConceptDistanceMeasure &&source);
+    // // Move constructor
+    // ConceptDistanceMeasure(ConceptDistanceMeasure &&source);
     
     // methods
+    void setSharedMemory(SharedMemory *sharedMemory){
+        this->sharedMemory = sharedMemory;
+    }
+
+    std::string getIdentifier(){
+        return this->identifyer;
+    }
+
+    virtual void init() = 0;
+
+    virtual double measureDistance() = 0;
 
 };
 

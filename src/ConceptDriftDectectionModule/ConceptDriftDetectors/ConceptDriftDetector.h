@@ -3,27 +3,43 @@
 // Abstract base class interface
 
 #include <string>
+#include "SharedMemory.h"
 
 class ConceptDriftDetector
 {
 private:
     
 protected:
-    
+    std::string identifyer;
+    SharedMemory *sharedMemory;
+
 public:
     // Constructors
-    ConceptDriftDetector();
+    // ConceptDriftDetector();
 
     // Destructor
-    virtual ~ConceptDriftDetector();
+    virtual ~ConceptDriftDetector() {
+        sharedMemory = NULL;
+    };
     
     // Copy constructor
-    ConceptDriftDetector(const ConceptDriftDetector &source);
+    // ConceptDriftDetector(const ConceptDriftDetector &source);
     
     // Move constructor
-    ConceptDriftDetector(ConceptDriftDetector &&source);
+    // ConceptDriftDetector(ConceptDriftDetector &&source);
     
     // methods
+    void setSharedMemory(SharedMemory *sharedMemory){
+        this->sharedMemory = sharedMemory;
+    }
+
+    std::string getIdentifier(){
+        return this->identifyer;
+    }
+
+    virtual void init() = 0;
+
+    virtual int detect() = 0;
 
 };
 

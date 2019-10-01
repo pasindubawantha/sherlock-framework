@@ -1,0 +1,15 @@
+speed_t4013 
+total = 2496
+
+training keras = 250 (0.1)  2015-09-02 17:00:00
+threshold keras = 362 - 251 (0.45) 2015-09-03 09:46:00 (111)
+
+threshold ls =  556 - 251 = 305
+
+Memory 
+Eigen::internal::aligned_malloc
+
+void *qRealloc(void *ptr, std::size_t size)
+void *qMalloc(std::size_t size)
+
+CNN.cpp line 307, 339

@@ -11,13 +11,18 @@ class LSTMCNnetProfiler: public Profiler
 private:
     
 protected:
-    LSTMCNNFCPredictionModel predictionModel;
-    ModelStruct modelStruct;
+    LSTMCNNFCPredictionModel *predictionModel;
+    ModelStruct *modelStruct;
     double trainingRatio = 1;
+    double lstmW;
+    double cnnW;
+    bool verbose = false;
 
 public:
     // Constructors
     LSTMCNnetProfiler(std::string identifyer);
+
+    LSTMCNnetProfiler(std::string identifyer, ModelStruct *model, double lstmWeight, double cnnWeight);
 
     virtual ~LSTMCNnetProfiler() override;
     

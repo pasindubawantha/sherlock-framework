@@ -18,7 +18,9 @@ public:
     // AnomalyDetector();
 
     // Destructor
-    virtual ~AnomalyDetector() {};
+    virtual ~AnomalyDetector() {
+        sharedMemory = NULL;
+    };
     
     // Copy constructor
     // AnomalyDetector(const AnomalyDetector &source);
