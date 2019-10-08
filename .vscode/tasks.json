@@ -17,7 +17,8 @@
         {
             "label": "build and run",
             "type": "shell",
-            "command": "cmake .. && make -j7 VERBOSE=1 && echo \"Build Complete ################## \n\n\" && ./src/Sherlock",
+            // "command": "cmake .. && make -j7 VERBOSE=1 && echo \"Build Complete ################## \n\n\" && ./src/Sherlock",
+            "command": "cmake .. && make -j7 VERBOSE=1 && echo \"Build Complete ################## \n\n\"",
             "options": {
                 "cwd": "${workspaceFolder}/debug"
             },
