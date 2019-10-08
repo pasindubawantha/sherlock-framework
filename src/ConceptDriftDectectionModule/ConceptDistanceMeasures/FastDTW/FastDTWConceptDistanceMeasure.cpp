@@ -29,8 +29,8 @@ double FastDTWConceptDistanceMeasure::measureDistance()
     int radius = 2;
     
     if(!sharedMemory->profiler->training && 
-    sharedMemory->profiler->profile->index >= sharedMemory->anomalyDetector->inWindowSize &&
-    sharedMemory->profiler->profiledCount > sharedMemory->anomalyDetector->inWindowSize){
+    sharedMemory->profiler->profile->index+1 >= sharedMemory->anomalyDetector->inWindowSize &&
+    sharedMemory->profiler->profiledCount >= sharedMemory->anomalyDetector->inWindowSize){
         Eigen::VectorXd expectedVec = Eigen::VectorXd::Zero(sharedMemory->anomalyDetector->inWindowSize);
         Eigen::VectorXd predictedVec = Eigen::VectorXd::Zero(sharedMemory->anomalyDetector->inWindowSize);
 

@@ -37,7 +37,7 @@ CNN::CNN(std::tuple <int, int, int> dimensions, struct NetStruct netStruct) {
         switch (layerOrder[i]) {
             case 'C':
             {    
-                std::cout<<"Initializing Convolution Layer"<<CLpos+1<<"...\n";
+                // std::cout<<"Initializing Convolution Layer"<<CLpos+1<<"...\n";
                 netLayers.CL[CLpos] = ConvolutionLayer(
                     dimensions,
                     netStruct.CL[CLpos].filterSize, 
@@ -51,7 +51,7 @@ CNN::CNN(std::tuple <int, int, int> dimensions, struct NetStruct netStruct) {
             }
             case 'P':
             {    
-                std::cout<<"Initializing Pool Layer"<<PLpos+1<<"...\n";
+                // std::cout<<"Initializing Pool Layer"<<PLpos+1<<"...\n";
                 netLayers.PL[PLpos] = PoolLayer(
                     dimensions, 
                     netStruct.PL[PLpos].poolW, 
@@ -63,7 +63,7 @@ CNN::CNN(std::tuple <int, int, int> dimensions, struct NetStruct netStruct) {
             }
             case 'F':
             {    
-                std::cout<<"Initializing Fully Connected Layer"<<FCLpos+1<<"...\n";
+                // std::cout<<"Initializing Fully Connected Layer"<<FCLpos+1<<"...\n";
                 netLayers.FCL[FCLpos] = FCLayer(
                     dimensions, 
                     netStruct.FCL[FCLpos].outputs

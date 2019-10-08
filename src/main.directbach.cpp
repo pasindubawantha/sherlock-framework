@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <json.hpp>
 #include <iomanip>
+// #include <experimental/filesystem>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -48,7 +49,6 @@
 #include "ConfidenceIntervalConceptThresholdSetter.h"
 
 #include "ConceptDriftDetector.h"
-// #include "NoConceptDriftDetector.h"
 #include "DynamicWindowConceptDriftDetector.h"
 
 
@@ -63,17 +63,16 @@ SharedMemory *sharedMemory;
 MainLoop *mainLoop;
 ModelStruct *modelStruct;
 
+std::string inputDirName = "../data/nab_tuned/"; 
 
-std::string inputFileName = "../data/nab_tuned/test/Twitter_volume_AAPL.csv"; // set by args
-std::string configurationFileName = "../data/nab_tuned/test/Twitter_volume_AAPL.json"; //set by args
-std::string outputFileName = "../data/nab_tuned_results/test1/Twitter_volume_AAPL.csv"; // set by args
-
+std::string outputDirName = "../data/nab_tuned_results_p05/";
+// std::string outputDirName = "../data/nab_tuned_results_p075/";
 bool verbose = false;
 int processedCount = 0;
 int processesLimit = -1;
-double predictionTrainingRatio = 0.1; // set by args
-double thresholdTrainingRatio = 0.045; // set by args
-double thresholdMaxMultipler = 2.0; // set by args
+double predictionTrainingRatio = 0.05;
+// double predictionTrainingRatio = 0.075;
+double thresholdTrainingRatio = 0.045;
 
 struct ROW {
     std::string timestamp;
@@ -98,39 +97,70 @@ struct ROW {
     }
 };
 
+int isDirectory(const char *path) {
+   struct stat statbuf;
+   if (stat(path, &statbuf) != 0)
+       return 0;
+   return S_ISDIR(statbuf.st_mode);
+}
 
+void proccessInputDir(const std::string inputDirectory) {
+   struct dirent *entry;
+   DIR *dir = opendir(inputDirectory.c_str());
+   int size;
 
+   if (dir == NULL) {
+      return;
+   }
+   while ((entry = readdir(dir)) != NULL &&
+        (processesLimit < 1 || processesLimit > processedCount)){
+       if(entry->d_name[0] != '.'){    
+            std::string file(entry->d_name);
+            file = inputDirectory + file;
+            size = file.size();
+            if(isDirectory(file.c_str())){
+                file = file +"/";
+                proccessInputDir(file);
+            } else if(file[size-4] == '.' &&
+            file[size-3] == 'c' &&
+            file[size-2] == 's' &&
+            file[size-1] == 'v'){
+                
+                std::cout << "[main:proccessInputDir] Processing " << file << std::endl;
+                std::string fileName(entry->d_name);
+                fileName.resize(fileName.size()-4);
 
-int main(int argc, char** argv) 
+                processDataSet(inputDirectory, fileName);
+                processedCount++;
+            }
+       }
+   }
+   closedir(dir);
+}
+
+int main()
 {
-
-    if(argc < 7){
-        std::cout << "[main] Provide arguments : '$Sherlock inputFileName outputFileName configurationFileName predictionTrainingRatio thresholdTrainingRatio thresholdMaxMultipler'" <<std::endl;
-        return 0;
-    }
-    inputFileName = argv[1];
-    std::cout << "[main] inputFileName = " << inputFileName << std::endl;
-    outputFileName = argv[2];
-    std::cout << "[main] outputFileName = " << outputFileName << std::endl;
-    configurationFileName = argv[3];
-    std::cout << "[main] configurationFileName = " << configurationFileName << std::endl;
-
-    predictionTrainingRatio = atof(argv[4]);
-    std::cout << "[main] predictionTrainingRatio = " << predictionTrainingRatio << std::endl;
-    thresholdTrainingRatio = atof(argv[5]);
-    std::cout << "[main] thresholdTrainingRatio = " << thresholdTrainingRatio << std::endl;
-    thresholdMaxMultipler = atof(argv[6]);
-    std::cout << "[main] thresholdMaxMultipler = " << thresholdMaxMultipler << std::endl;
-
     std::cout << "[main] Starting" <<std::endl;
+    
 
-
-    processConfigJSON(configurationFileName); // it configures MainLoop too 
-    runLSTMCNnet(inputFileName, outputFileName);
+    proccessInputDir(inputDirName);
         
     
     std::cout << "[main] Ended" << std::endl;
     return 0;
+}
+
+void processDataSet(std::string fileBasePath, std::string fileName){
+
+    // std::string fileJSON = "../data/test/exchange-2_cpc_results.json";
+    std::string fileJSON = fileBasePath + fileName + ".json";
+    processConfigJSON(fileJSON); // it configures MainLoop too 
+    
+    // std::string inputFileName = "../data/test/exchange-2_cpc_results.csv";
+    std::string inputFileName = fileBasePath + fileName + ".csv";
+    // std::string outputFileName = "../data/test_results/exchange-2_cpc_results.200.csv";
+    std::string outputFileName = outputDirName + fileName + ".csv";
+    runLSTMCNnet(inputFileName, outputFileName);
 }
 
 void processConfigJSON(std::string fileJSON){
@@ -141,8 +171,11 @@ void processConfigJSON(std::string fileJSON){
 
     // Initializing the structure
     modelStruct = new ModelStruct();
+    // modelStruct.trainDataSize = (int)JSONDocument["prediction_model"]["trainDataSize"];
+    // std::cout << "[main:processConfigJSON] Got trainDataSize from : "<< fileJSON << " : " << modelStruct.trainDataSize << std::endl;
 
     int input_size = (int)JSONDocument["input_size"];
+    modelStruct->trainDataSize = (int)(input_size*predictionTrainingRatio) + 1;
 
     modelStruct->learningRate = (double)JSONDocument["prediction_model"]["learningRate"];
     std::cout << "[main:processConfigJSON] Got learningRate from : "<< fileJSON << " : " << modelStruct->learningRate << std::endl;
@@ -150,8 +183,11 @@ void processConfigJSON(std::string fileJSON){
     modelStruct->trainingIterations = (int)JSONDocument["prediction_model"]["trainingIterations"]; 
     std::cout << "[main:processConfigJSON] Got trainingIterations from : "<< fileJSON << " : " << modelStruct->trainingIterations << std::endl;
 
+    // modelStruct.numPredPoints = (int)JSONDocument["prediction_model"]["numPredPoints"];
     modelStruct->numPredPoints = 1;
+    // std::cout << "[main:processConfigJSON] Got numPredPoints from : "<< fileJSON << " : " << modelStruct.numPredPoints << std::endl;
 
+    
     // LSTM parameters
     modelStruct->memCells = (int)JSONDocument["prediction_model"]["model"]["LSTM"]["memCells"];
     std::cout << "[main:processConfigJSON] Got LSTM params from : "<< fileJSON << std::endl;
@@ -160,6 +196,8 @@ void processConfigJSON(std::string fileJSON){
     modelStruct->matWidth = (int)JSONDocument["prediction_model"]["model"]["CNN"]["matWidth"];
     modelStruct->matHeight = (int)JSONDocument["prediction_model"]["model"]["CNN"]["matHeight"];
     modelStruct->targetC = (int)JSONDocument["prediction_model"]["model"]["CNN"]["targetC"];
+
+    // modelStruct->trainDataSize =  modelStruct->trainDataSize - modelStruct->matWidth*modelStruct->matHeight;
     
     std::vector<nlohmann::json> ConvolutionLayers;
     JSONDocument["prediction_model"]["model"]["CNN"]["ConvolutionLayers"].get_to(ConvolutionLayers);
@@ -213,13 +251,12 @@ void processConfigJSON(std::string fileJSON){
     std::cout << "[main:processConfigJSON] Done building model in file : "<< fileJSON << " !" <<std::endl;
 
 
-    modelStruct->trainDataSize = (int)(input_size*predictionTrainingRatio) + 1 - (int)(modelStruct->matHeight*modelStruct->matWidth);
-
     // # History Buffer
     historyBuffer = new HistoryBuffer();
-    int historyBufferSize = modelStruct->trainDataSize+(modelStruct->matHeight*modelStruct->matWidth);
+    int historyBufferSize = modelStruct->trainDataSize + modelStruct->matWidth* modelStruct->matHeight; // set buffer size to 100 (Short memoty size)
+    // int historyBufferSize = modelStruct.trainDataSize;
     double *bufferHistory = new double[historyBufferSize]; 
-    historyBuffer->setSize(historyBufferSize, bufferHistory);
+    historyBuffer->setSize(historyBufferSize, bufferHistory); // set buffer size to 100 (Short memoty size)
 
     double lstmW = (double)JSONDocument["prediction_model"]["model"]["lstmW"];
     std::cout << "[main:processConfigJSON] Got LSTM Weight from : "<< fileJSON << " : " << lstmW << std::endl;
@@ -235,27 +272,29 @@ void processConfigJSON(std::string fileJSON){
     // # Shared Memory 
 
     // ## profiler
-    int profilerSize = (int)JSONDocument["dtw_window"];
+    int profilerSize = 6;
     ProfilerMemory *profilerMemory = new ProfilerMemory(profilerSize);
-    profilerMemory->inWindowSize = modelStruct->matWidth*modelStruct->matHeight;
+    profilerMemory->inWindowSize = modelStruct->matWidth*modelStruct->matHeight + 1; // inWindowSize > mathight*matwidth + outWindowsize & inWindowSize < historyBufferSize
     profilerMemory->OutWindowSize = 1;
-    profilerMemory->minTrainingWindowSize = modelStruct->trainDataSize + (modelStruct->matHeight*modelStruct->matWidth);
+    profilerMemory->minTrainingWindowSize = modelStruct->trainDataSize;
 
     // ### anomaly detector
-    int anomlayDetectorInWindowSize = (int)JSONDocument["dtw_window"];
-    int anomalyDistanceSize = (int)((input_size - (modelStruct->trainDataSize+(modelStruct->matHeight*modelStruct->matWidth)))*thresholdTrainingRatio) - anomlayDetectorInWindowSize;
+    int anomlayDetectorInWindowSize = 4;
+    int anomalyDistanceSize = (int)(input_size*thresholdTrainingRatio) - anomlayDetectorInWindowSize;
+    // int anomalyDistanceSize = 1;
     int anomlayWarrningSize = 1; 
     int anomalyAlarmSize = 1;
     AnomalyDetectorMemory *anomalyDetectorMemory = new AnomalyDetectorMemory(anomalyDistanceSize, anomlayWarrningSize, anomalyAlarmSize);
+    // anomalyDetectorMemory->inWindowSize = (int)JSONDocument["dtw_window"]; // inWindowSize < profilerSize
     anomalyDetectorMemory->inWindowSize = anomlayDetectorInWindowSize;
 
     // ### concept drift detector
-    int conceptDetectorInWindowSize = anomlayDetectorInWindowSize;
+    int conceptDetectorInWindowSize = anomalyDistanceSize;
     int conceptDistanceSize = anomalyDistanceSize;
     int conceptWarningSize = 1;
     int conceptAlarmSize = 1;
     ConceptDriftDetectorMemory *conceptDriftDetectorMemory = new ConceptDriftDetectorMemory(conceptDistanceSize, conceptWarningSize, conceptAlarmSize);
-    conceptDriftDetectorMemory->inWindowSize=conceptDetectorInWindowSize;
+    conceptDriftDetectorMemory->inWindowSize=conceptDetectorInWindowSize; // inWindowSize < profilerSize
     
     sharedMemory = new SharedMemory(profilerMemory, anomalyDetectorMemory, conceptDriftDetectorMemory);
     sharedMemory->history = new Queue<double>(historyBufferSize);
@@ -276,7 +315,7 @@ void configureMainLoop(){
     mainLoop->setAnomalyDistanceMeasure(anomalyDestanceMeasure);
 
     // setting anomaly threshold setter
-    double maxMultiplierAlarm = thresholdMaxMultipler;
+    double maxMultiplierAlarm = 1.75;
     double maxMultiplierWarning = 1.5;
     AnomalyThresholdSetter *anomalyThresholdSetter = new TrainingMaxAnomalyThresholdSetter("maxAnomalyThrehsolder 1", maxMultiplierWarning, maxMultiplierAlarm);
     // double alphaWarrningAnomaly = 2;
@@ -301,7 +340,7 @@ void configureMainLoop(){
     mainLoop->setConceptThresholdSetter(conceptThresholdSetter);
 
     // setting concept drift detector
-    ConceptDriftDetector *conceptDriftDetector = new DynamicWindowConceptDriftDetector("DCDD");
+    ConceptDriftDetector *conceptDriftDetector = new DynamicWindowConceptDriftDetector("CDD");
     mainLoop->setConceptDriftDetector(conceptDriftDetector);
 
 

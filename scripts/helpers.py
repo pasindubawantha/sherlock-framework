@@ -69,3 +69,9 @@ def MSE_multipoint(y, y_hats, no_of_prediction_points):
                 mse += (y[i+y_hat_index] - y_hat[i])**2
     mse = mse/(no_of_prediction_points*len(y))
     return np.around(mse,decimals=6)
+
+def sherlock_dump_summary(results_array, file_name):
+    dump_file = open(file_name,'w')
+    for r in results_array:
+        dump_file.write(r + ",\n")
+    dump_file.close()

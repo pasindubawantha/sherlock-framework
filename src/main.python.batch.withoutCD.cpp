@@ -48,8 +48,7 @@
 #include "ConfidenceIntervalConceptThresholdSetter.h"
 
 #include "ConceptDriftDetector.h"
-// #include "NoConceptDriftDetector.h"
-#include "DynamicWindowConceptDriftDetector.h"
+#include "NoConceptDriftDetector.h"
 
 
 void runLSTMCNnet(std::string inputFileName, std::string outputFileName);
@@ -301,7 +300,7 @@ void configureMainLoop(){
     mainLoop->setConceptThresholdSetter(conceptThresholdSetter);
 
     // setting concept drift detector
-    ConceptDriftDetector *conceptDriftDetector = new DynamicWindowConceptDriftDetector("DCDD");
+    ConceptDriftDetector *conceptDriftDetector = new NoConceptDriftDetector("NCDD");
     mainLoop->setConceptDriftDetector(conceptDriftDetector);
 
 

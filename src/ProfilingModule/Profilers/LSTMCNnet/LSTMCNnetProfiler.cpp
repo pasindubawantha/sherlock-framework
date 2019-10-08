@@ -112,13 +112,15 @@ void LSTMCNnetProfiler::init()
 double LSTMCNnetProfiler::profile() 
 {
     double profile = 0;
-
-    if( (modelStruct->trainDataSize + (modelStruct->matHeight*modelStruct->matWidth) -1) > sharedMemory->history->index){
+    if(modelStruct->trainDataSize < modelStruct->matHeight*modelStruct->matWidth){
+        std::cout << "[LSTMCNnetProfiler:ERROR!] Not enogh training ratio to train model ! {" << identifyer << "}"  << std::endl;
+    };
+    if( (modelStruct->trainDataSize + (modelStruct->matHeight*modelStruct->matWidth-1)) > sharedMemory->history->index){
         if(verbose)
         std::cout << "[LSTMCNnetProfiler] Collecting data to train ! {" << identifyer << "}"  << std::endl;
         sharedMemory->profiler->trainingDataCollected += 1;
     } else {
-        if((modelStruct->trainDataSize + (modelStruct->matHeight*modelStruct->matWidth) -1) > sharedMemory->profiler->trainingDataCollected){
+        if((modelStruct->trainDataSize + (modelStruct->matHeight*modelStruct->matWidth-1)) > sharedMemory->profiler->trainingDataCollected){
             if(verbose)
             std::cout << "[LSTMCNnetProfiler] Collecting data to train for new concept ! {" << identifyer << "}"  << std::endl;
             sharedMemory->profiler->trainingDataCollected += 1;
