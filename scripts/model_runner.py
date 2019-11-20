@@ -10,13 +10,14 @@ import helpers
 import confusion_metrics
 
 # args
-sherlock = "../debug/src/SherlockNoCDD"
-input_dir = "../data/nab_tuned/"
+sherlock = "../debug/src/Sherlock"
+input_dir = "../data/nab_tuned_CDD/"
 # input_dir = "../data/test/"
 input_summary_file = "../data/nab_tuned_summary.csv"
-output_dir = "../data/nab_tuned_results_noCDD/"
+output_dir = "../data/nab_tuned_results_CDD/"
 # output_dir = "../data/test_results/"
-model_summary_file = "../data/sherlock-noCDD_list.csv"
+model_summary_file = "../data/sherlock-CDD_list.csv"
+nan_folder = "../data/nab_nan/CDD/"
 
 max_training_ratio = 0.15
 prediction_training_ratio_fraction = 0.75
@@ -38,11 +39,14 @@ csv_input_files.sort()
 
 try:
     shutil.rmtree(output_dir)
+    shutil.rmtree(nan_folder)
 except OSError:
     print("No previous ", output_dir)
 
 os.mkdir(output_dir)
+os.mkdir(nan_folder)
 
+file_count = 0
 for f in csv_input_files:
     print("####### Running Sherlock : " + f)
     fconfig = f[:-3] + "json"
@@ -104,6 +108,15 @@ for f in csv_input_files:
     threshold_training = np.array(dataframe['threshold_training'])
     distance_threshold = np.array(dataframe['distance_threshold'])
     positive_detection = np.array(dataframe['positive_detection'])
+
+            ## Check if its a nan generating file
+    if np.isnan(prediction[-1]):
+        print("file with nan")
+        shutil.copyfile(fconfig, nan_folder + fconfig.split('/')[-1])
+        shutil.copyfile(f, nan_folder + f.split('/')[-1])
+        model_summary.append(fname+"nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan")
+        helpers.sherlock_dump_summary(model_summary, model_summary_file)
+        continue
     
     prediction_training_count = 0
     for i in prediction_training:
@@ -158,5 +171,8 @@ for f in csv_input_files:
     model_summary_row += str(input_summary['first_label_ratio'][fname])
     model_summary.append(model_summary_row)
     helpers.sherlock_dump_summary(model_summary, model_summary_file)
+
+    file_count += 1
+    print("+++++++++++++++ Processed " +str(file_count) + " of " + str(len(csv_input_files)))
 
 print("Done !!")

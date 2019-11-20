@@ -9,10 +9,10 @@ import helpers
 import confusion_metrics
 
 # args start
-output_directory = "../data/test_results"
-input_directory = "../data/test_results"
+output_directory = "../data/nab_tuned_results_CDD_LSTM"
+input_directory = "../data/nab_tuned_results_CDD_LSTM"
 input_summary_file = "../data/nab_tuned_summary.csv"
-model_summary_file = "../data/sherlock_list.csv"
+model_summary_file = "../data/sherlock-CDD__LSTM_list.csv"
 
 max_training_ratio = 0.15
 threshold_max_multipler = 2
@@ -31,7 +31,7 @@ for path, dnames, fnames in os.walk(input_directory):
 csv_input_files.sort()
 
 for f in csv_input_files:
-
+    print("Processing " + f)
     # Getting old values
     dataframe = pandas.read_csv(f)
 
@@ -96,7 +96,7 @@ for f in csv_input_files:
     newDataFrame.index.name = "timestamp"
     newDataFrame = newDataFrame[['value','prediction_training','prediction','label','warp_distance', 'threshold_training', 'distance_threshold', 'positive_detection']]
     fout = output_directory + '/' + f.split('/')[-1]
-    print(fout)
+    
     newDataFrame.to_csv(fout)
 
     
@@ -109,21 +109,23 @@ for f in csv_input_files:
     model_dataframe.at[file_name, 'FP'] = metrics.get_FP()
     model_dataframe.at[file_name, 'FN'] = metrics.get_FN()
     # Setting new threshold_max_multipler in threshold_parameters
-    threshold_parameter_list = model_dataframe.at[file_name, 'threshold_parameters'].split(";")
-    threshold_parameters = ""
-    for s in threshold_parameter_list:
-            setting_max_multiplier = False
-            if "training_ratio" in s:
-                    if "training_ratio=" == s[:15]:
-                            threshold_parameters += "training_ratio="+str(threshold_training_ratio)+";"
-                            setting_max_multiplier = True
-            if "threshold_max_multipler" in s:
-                    if "threshold_max_multipler=" == s[:24]:
-                            threshold_parameters += "threshold_max_multipler="+str(threshold_max_multipler)+";"
-                            setting_max_multiplier = True
-            if not setting_max_multiplier and not s == "":
-                    threshold_parameters += s+";"
-    
-    model_dataframe.at[file_name, 'threshold_parameters'] = threshold_parameters
+    if type(model_dataframe.at[file_name, 'threshold_parameters']) is str :
+        threshold_parameter_list = model_dataframe.at[file_name, 'threshold_parameters'].split(";")
+        threshold_parameters = ""
+        for s in threshold_parameter_list:
+                setting_max_multiplier = False
+                if "training_ratio" in s:
+                        if "training_ratio=" == s[:15]:
+                                threshold_parameters += "training_ratio="+str(threshold_training_ratio)+";"
+                                setting_max_multiplier = True
+                if "threshold_max_multipler" in s:
+                        if "threshold_max_multipler=" == s[:24]:
+                                threshold_parameters += "threshold_max_multipler="+str(threshold_max_multipler)+";"
+                                setting_max_multiplier = True
+                if not setting_max_multiplier and not s == "":
+                        threshold_parameters += s+";"
+        
+        model_dataframe.at[file_name, 'threshold_parameters'] = threshold_parameters
+    print("Done " + fout)
 
 print("Done !!")

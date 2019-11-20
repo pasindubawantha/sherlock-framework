@@ -12,7 +12,7 @@ import SocketServer
 
 # PORT = 8000
 
-data_directory = "../data/nab_tuned_results"
+data_directory = "../data/nab_tuned_results_noCDD_training_ratio/training_ratio_0.35"
 write_directory = "./data"
 
 reg_x = re.compile(r'\.(csv)')

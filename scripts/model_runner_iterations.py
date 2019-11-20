@@ -11,13 +11,14 @@ import confusion_metrics
 
 # args
 sherlock = "../debug/src/SherlockNoCDD"
-input_dir = "../data/nab_tuned/"
+input_dir = "../data/nab_tuned_CDD/"
 # input_dir = "../data/test/"
 input_summary_file = "../data/nab_tuned_summary.csv"
 output_dir = "../data/nab_tuned_results_noCDD_iterations/"
 # output_dir = "../data/test_results/"
 model_summary_prefix = "../data/nab_tuned_results_noCDD_iterations/sherlock-noCDD_list"
 no_of_iterations = 30
+nan_folder = "../data/nab_nan/noCDD_iterations/"
 
 max_training_ratio = 0.15
 prediction_training_ratio_fraction = 0.75
@@ -29,10 +30,12 @@ input_summary = pandas.read_csv(input_summary_file, index_col="file")
 
 try:
     shutil.rmtree(output_dir)
+    shutil.rmtree(nan_folder)
 except OSError:
     print("No previous ", output_dir)
 
 os.mkdir(output_dir)
+os.mkdir(nan_folder)
 
 for iteration in range(1, no_of_iterations+1):
     iteration_output_dir = output_dir + "/iteration_"+str(iteration) + "/"
@@ -116,6 +119,15 @@ for iteration in range(1, no_of_iterations+1):
         threshold_training = np.array(dataframe['threshold_training'])
         distance_threshold = np.array(dataframe['distance_threshold'])
         positive_detection = np.array(dataframe['positive_detection'])
+
+        ## Check if its a nan generating file
+        if np.isnan(prediction[-1]):
+            print("file with nan")
+            shutil.copyfile(fconfig, nan_folder + fconfig.split('/')[-1])
+            shutil.copyfile(f, nan_folder + f.split('/')[-1])
+            model_summary.append(fname+"nan,nan,nan,nan,nan,nan,nan,nan,nan,nan,nan")
+            helpers.sherlock_dump_summary(model_summary, iteration_model_summary_file)
+            continue
     
         prediction_training_count = 0
         for i in prediction_training:
@@ -170,5 +182,5 @@ for iteration in range(1, no_of_iterations+1):
         model_summary_row += str(input_summary['first_label_ratio'][fname])
         model_summary.append(model_summary_row)
         helpers.sherlock_dump_summary(model_summary, iteration_model_summary_file)
-    print ("##### Done Iteration : "+str(iteration+" Out of "+str(no_of_iterations)))
+    print ("##### Done Iteration : "+str(iteration)+" Out of "+str(no_of_iterations))
 print("Done !!")

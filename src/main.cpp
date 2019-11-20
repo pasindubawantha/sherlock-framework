@@ -19,6 +19,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <math.h> 
 
 
 #include "MainLoop.h"
@@ -222,9 +223,11 @@ void processConfigJSON(std::string fileJSON){
     historyBuffer->setSize(historyBufferSize, bufferHistory);
 
     double lstmW = (double)JSONDocument["prediction_model"]["model"]["lstmW"];
+    // double lstmW = 1.0;
     std::cout << "[main:processConfigJSON] Got LSTM Weight from : "<< fileJSON << " : " << lstmW << std::endl;
 
     double cnnW = (double)JSONDocument["prediction_model"]["model"]["cnnW"];
+    // double cnnW = 0.0;
     std::cout << "[main:processConfigJSON] Got CNN Weight from : "<< fileJSON << " : " << cnnW << std::endl;
 
     // # LSTMCNnetProfiler
@@ -301,7 +304,8 @@ void configureMainLoop(){
     mainLoop->setConceptThresholdSetter(conceptThresholdSetter);
 
     // setting concept drift detector
-    ConceptDriftDetector *conceptDriftDetector = new DynamicWindowConceptDriftDetector("DCDD");
+    // ConceptDriftDetector *conceptDriftDetector = new NoConceptDriftDetector("NoCDD");
+    ConceptDriftDetector *conceptDriftDetector = new DynamicWindowConceptDriftDetector("CDD");
     mainLoop->setConceptDriftDetector(conceptDriftDetector);
 
 
@@ -417,6 +421,9 @@ void runLSTMCNnet(std::string inputFileName, std::string outputFileName){
                 outputStream << (double)writeROW.positive_detection ;
                 
                 outputStream << std::endl;; 
+                if (isnan(writeROW.prediction)){
+                    break;
+                }
             }
         }
     }

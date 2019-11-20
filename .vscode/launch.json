@@ -26,7 +26,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/debug/src/Sherlock",
-            "args": ["../data/nab_tuned/test/Twitter_volume_AAPL.csv", "../data/nab_tuned_results/Twitter_volume_AAPL.csv", "../data/nab_tuned/test/Twitter_volume_AAPL.json", "0.115", "0.045"],
+            "args": ["../data/nab_tuned/realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv", "../data/nab_tuned_results_noCDD/ec2_cpu_utilization_24ae8d.csv", "../data/nab_tuned/realAWSCloudwatch/ec2_cpu_utilization_24ae8d.json", "0.1125", "0.0421905560212", "2"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/debug",
             "environment": [],
